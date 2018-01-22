@@ -62,16 +62,18 @@ COMMENT ON COLUMN Specialization.label is 'The name of the specialization';
 COMMENT ON COLUMN Specialization.acronym is 'The acronym of the specialiaztion (2COM, OSIE...)';
 COMMENT ON COLUMN Specialization.school_year_id is 'School year related to this specialization';
 
-CREATE TABLE IF NOT EXISTS StudentGroup (
+CREATE TABLE IF NOT EXISTS SubjectGroup (
     id SERIAL PRIMARY KEY,
     label VARCHAR(255) NOT NULL,
-    type GroupType NOT NULL
+    type GroupType NOT NULL,
+    subect_id INTEGER REFERENCES Subject ON DELETE CASCADE
 );
 
-COMMENT ON TABLE StudentGroup is 'Group of students';
-COMMENT ON COLUMN StudentGroup.id is 'The primary unique identifier for a group';
-COMMENT ON COLUMN StudentGroup.label is 'The name of the group';
-COMMENT ON COLUMN StudentGroup.type is 'Group of lecture or tutorial';
+COMMENT ON TABLE SubjectGroup is 'Group of students that follow the same subjec';
+COMMENT ON COLUMN SubjectGroup.id is 'The primary unique identifier for a group';
+COMMENT ON COLUMN SubjectGroup.label is 'The name of the group';
+COMMENT ON COLUMN SubjectGroup.type is 'Group of lecture or tutorial';
+COMMENT ON COLUMN SubjectGroup.subect_id is 'Subject related to this group';
 
 -- ACCOUNT TABLES
 CREATE TABLE IF NOT EXISTS Credentials (
@@ -89,7 +91,7 @@ COMMENT ON COLUMN Credentials.salt is 'Salf used for the password';
 
 CREATE TABLE IF NOT EXISTS Admin (
     id SERIAL PRIMARY KEY,
-    credentials_id INTEGER REFERENCES Credentials
+    credentials_id INTEGER REFERENCES Credentials ON DELETE CASCADE
 );
 
 COMMENT ON TABLE Admin is 'Admin account';
@@ -113,29 +115,29 @@ COMMENT ON COLUMN Student.student_number is 'UPJV Student number';
 COMMENT ON COLUMN Student.credentials_id is 'Credentials linked to this account';
 COMMENT ON COLUMN Student.specialization_id is 'Student specialization this year';
 
-CREATE TABLE IF NOT EXISTS Profesor (
+CREATE TABLE IF NOT EXISTS Professor (
     id SERIAL PRIMARY KEY,
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
     credentials_id INTEGER REFERENCES Credentials ON DELETE CASCADE
 );
 
-COMMENT ON TABLE Profesor is 'Profesor account';
-COMMENT ON COLUMN Profesor.id is 'The primary unique identifier for an profesor account';
-COMMENT ON COLUMN Profesor.first_name is 'Profesor first name';
-COMMENT ON COLUMN Profesor.last_name is 'Profesor last name';
-COMMENT ON COLUMN Profesor.credentials_id is 'Credentials linked to this account';
+COMMENT ON TABLE Professor is 'Professor account';
+COMMENT ON COLUMN Professor.id is 'The primary unique identifier for an professor account';
+COMMENT ON COLUMN Professor.first_name is 'Professor first name';
+COMMENT ON COLUMN Professor.last_name is 'Professor last name';
+COMMENT ON COLUMN Professor.credentials_id is 'Credentials linked to this account';
 
 -- DEEPLY LINKED TABLES
-CREATE TABLE IF NOT EXISTS StudentGroup (
-    group_id INTEGER REFERENCES StudentGroup ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS StudentSubjectGroup (
+    group_id INTEGER REFERENCES SubjectGroup ON DELETE CASCADE,
     student_id INTEGER REFERENCES Student ON DELETE CASCADE,
     PRIMARY KEY(group_id, student_id)
 );
 
-COMMENT ON TABLE StudentGroup is 'Represent the student-group association';
-COMMENT ON COLUMN StudentGroup.group_id is 'The group id';
-COMMENT ON COLUMN StudentGroup.student_id is 'The student id';
+COMMENT ON TABLE StudentSubjectGroup is 'Represent the student-group association';
+COMMENT ON COLUMN StudentSubjectGroup.group_id is 'The group id';
+COMMENT ON COLUMN StudentSubjectGroup.student_id is 'The student id';
 
 CREATE TABLE IF NOT EXISTS SpecializationSubject (
     specialization_id INTEGER REFERENCES Specialization ON DELETE CASCADE,
@@ -158,22 +160,22 @@ CREATE TABLE IF NOT EXISTS SpecializationSkill (
     PRIMARY KEY(skill_id, specialization_id)
 );
 
-COMMENT ON TABLE SpecializationSubject is 'Represent the specialization-subject association';
+COMMENT ON TABLE SpecializationSubject is 'Represent the specialization-skill association';
 COMMENT ON COLUMN SpecializationSubject.specialization_id is 'The specialization id';
 COMMENT ON COLUMN SpecializationSubject.skill_id is 'The skill linked to this association';
 COMMENT ON COLUMN SpecializationSubject.semester_id is 'The semester concerned';
 COMMENT ON COLUMN SpecializationSubject.subject_id is 'The subject id';
 
-CREATE TABLE IF NOT EXISTS ProfesorSubject(
-    profesor_id INTEGER REFERENCES Profesor ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS ProfessorSubject(
+    professor_id INTEGER REFERENCES Professor ON DELETE CASCADE,
     subject_id INTEGER REFERENCES Subject ON DELETE CASCADE,
     tutorial_hours_per_group SMALLINT NOT NULL,
     lecture_hours SMALLINT NOT NULL,
-    PRIMARY KEY(profesor_id, subject_id)
+    PRIMARY KEY(professor_id, subject_id)
 );
 
-COMMENT ON TABLE ProfesorSubject is 'Represent the profesor-subject association';
-COMMENT ON COLUMN ProfesorSubject.profesor_id is 'The profesor id';
-COMMENT ON COLUMN ProfesorSubject.subject_id is 'The subject id';
-COMMENT ON COLUMN ProfesorSubject.tutorial_hours_per_group is 'The number of tutorial hours / groupe for this profesor';
-COMMENT ON COLUMN ProfesorSubject.lecture_hours is 'The number of lecture hours for this profesor';
+COMMENT ON TABLE ProfessorSubject is 'Represent the professor-subject association';
+COMMENT ON COLUMN ProfessorSubject.professor_id is 'The professor id';
+COMMENT ON COLUMN ProfessorSubject.subject_id is 'The subject id';
+COMMENT ON COLUMN ProfessorSubject.tutorial_hours_per_group is 'The number of tutorial hours / groupe for this professor';
+COMMENT ON COLUMN ProfessorSubject.lecture_hours is 'The number of lecture hours for this professor';
