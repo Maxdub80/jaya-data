@@ -7,8 +7,15 @@ services:
       - .:/usr/app
     ports:
       - "3000:3000"
-    depends_on:
-      - database
+    links:
+      - database:db
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: jaya
+      DB_USER: admin
+      DB_PASSWORD: admin
+      DATABASE_URI: postgres://admin:admin@db:5432/jaya
       
   database:
     image: postgres:9.5
